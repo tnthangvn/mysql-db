@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+    mysql:
+        container_name: "common.mysql.8"
+        build:
+            context: .
+            dockerfile: .docker/mysql/Dockerfile
+        ports:
+            - '${FORWARD_DB_PORT}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        volumes:
+            - './mysql-data:/var/lib/mysql:rw'
+            # - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            retries: 3
+            timeout: 5s
+        networks:
+            - sail
+
+    adminer:
+        container_name: "common.adminer"
+        image: adminer
+        restart: always
+        ports:
+        - "${ADMINER_PORT}:8080"
+        environment:
+            ADMINER_DEFAULT_DB_HOST: "mysql"
+            MARIADB_DEFAULT_USER: ${DB_USERNAME}
+            MARIADB_USER: ${DB_USERNAME}
+            MARIADB_DEFAULT_PASSWORD: ${DB_PASSWORD}
+            MARIADB_PASSWORD: ${DB_PASSWORD}
+        networks:
+            - sail
+
+networks:
+  sail:
+    external: true
+
