@@ -39,6 +39,23 @@ services:
         networks:
             - sail
 
+    minio:
+        container_name: app.minio
+        image: minio/minio
+        restart: always
+        networks:
+        - api_network
+        ports:
+        - ${MINIO_PORT}:9000
+        - 9001:9001
+        volumes:
+        - ${MINIO_DATA}:/data:rw
+        environment:
+        MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+        MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+        MINIO_REGION_NAME: ${MINIO_REGION_NAME}
+        command: server /data --console-address :9001
+
 networks:
   sail:
     external: true
